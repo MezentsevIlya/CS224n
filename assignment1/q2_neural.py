@@ -29,6 +29,8 @@ def forward_backward_prop(X, labels, params, dimensions):
     ### Unpack network parameters (do not modify)
     ofs = 0
     Dx, H, Dy = (dimensions[0], dimensions[1], dimensions[2])
+    print(Dx, H, Dy)
+    print(X.shape)
 
     W1 = np.reshape(params[ofs:ofs+ Dx * H], (Dx, H))
     ofs += Dx * H
@@ -40,7 +42,15 @@ def forward_backward_prop(X, labels, params, dimensions):
 
     # Note: compute cost based on `sum` not `mean`.
     ### YOUR CODE HERE: forward propagation
-    raise NotImplementedError
+    X1 = sigmoid(np.matmul(X, W1) + b1)
+
+    y_pred = softmax(np.matmul(X1, W2) + b2)
+
+    print(y_pred.shape)
+    cost = -np.sum(labels * np.log(y_pred), axis=1)
+
+    print(cost.shape)
+
     ### END YOUR CODE
 
     ### YOUR CODE HERE: backward propagation
@@ -59,13 +69,13 @@ def sanity_check():
     Set up fake data and parameters for the neural network, and test using
     gradcheck.
     """
-    print "Running sanity check..."
+    print("Running sanity check...")
 
     N = 20
     dimensions = [10, 5, 10]
     data = np.random.randn(N, dimensions[0])   # each row will be a datum
     labels = np.zeros((N, dimensions[2]))
-    for i in xrange(N):
+    for i in range(N):
         labels[i, random.randint(0,dimensions[2]-1)] = 1
 
     params = np.random.randn((dimensions[0] + 1) * dimensions[1] + (
@@ -82,7 +92,7 @@ def your_sanity_checks():
     This function will not be called by the autograder, nor will
     your additional tests be graded.
     """
-    print "Running your sanity checks..."
+    print("Running your sanity checks...")
     ### YOUR CODE HERE
     raise NotImplementedError
     ### END YOUR CODE
