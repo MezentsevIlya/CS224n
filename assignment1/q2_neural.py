@@ -3,9 +3,9 @@
 import numpy as np
 import random
 
-from q1_softmax import softmax
-from q2_sigmoid import sigmoid, sigmoid_grad
-from q2_gradcheck import gradcheck_naive
+from assignment1.q1_softmax import softmax
+from assignment1.q2_sigmoid import sigmoid, sigmoid_grad
+from assignment1.q2_gradcheck import gradcheck_naive
 
 
 def forward_backward_prop(X, labels, params, dimensions):
@@ -29,8 +29,6 @@ def forward_backward_prop(X, labels, params, dimensions):
     ### Unpack network parameters (do not modify)
     ofs = 0
     Dx, H, Dy = (dimensions[0], dimensions[1], dimensions[2])
-    print(Dx, H, Dy)
-    print(X.shape)
 
     W1 = np.reshape(params[ofs:ofs+ Dx * H], (Dx, H))
     ofs += Dx * H
@@ -42,19 +40,28 @@ def forward_backward_prop(X, labels, params, dimensions):
 
     # Note: compute cost based on `sum` not `mean`.
     ### YOUR CODE HERE: forward propagation
-    X1 = sigmoid(np.matmul(X, W1) + b1)
+    h = sigmoid(np.dot(X, W1) + b1)
 
-    y_pred = softmax(np.matmul(X1, W2) + b2)
+    y_pred = softmax(np.dot(h, W2) + b2)
 
-    print(y_pred.shape)
-    cost = -np.sum(labels * np.log(y_pred), axis=1)
-
-    print(cost.shape)
-
+    cost = -np.sum(labels * np.log(y_pred))
     ### END YOUR CODE
 
     ### YOUR CODE HERE: backward propagation
-    raise NotImplementedError
+    d1 = (y_pred - labels)
+
+    gradW2 = np.dot(h.T, d1)
+
+    gradb2 = np.sum(d1, axis=0)
+
+    d2 = np.dot(d1, W2.T)
+
+    d3 = d2 * sigmoid_grad(h)
+    grad_h = d3
+
+    gradW1 = np.dot(X.T, grad_h)
+
+    gradb1 = np.sum(grad_h, 0)
     ### END YOUR CODE
 
     ### Stack gradients (do not modify)
@@ -94,7 +101,7 @@ def your_sanity_checks():
     """
     print("Running your sanity checks...")
     ### YOUR CODE HERE
-    raise NotImplementedError
+    # raise NotImplementedError
     ### END YOUR CODE
 
 
