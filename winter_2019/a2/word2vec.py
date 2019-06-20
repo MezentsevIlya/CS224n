@@ -77,11 +77,9 @@ def naiveSoftmaxLossAndGradient(
 
     gradCenterVec = outsideVectors.T.dot(y_hat - y)
     # (V, d).T * (V, 1) = (d, 1)
-    # print(gradCenterVec.shape)
 
     gradOutsideVecs = np.outer((y_hat - y), centerWordVec)
     # (V,) * (d,).T = (V, d)
-    # print(gradOutsideVecs.shape)
 
     ### END YOUR CODE
 
