@@ -117,11 +117,9 @@ def minibatch_parse(sentences, model, batch_size):
 
     while len(unfinished_parses) != 0:
         minibatch = unfinished_parses[:batch_size]
-        # unfinished_parses = unfinished_parses[batch_size:]
 
         predictions = model.predict(minibatch)
-        for partial_parse, pred in zip(minibatch, predictions):
-            partial_parse.parse_step(pred)
+        minibatch = [partial_parse.parse_step(pred) for partial_parse, pred in zip(minibatch, predictions)]
 
         unfinished_parses = [unfinished_parse for unfinished_parse in unfinished_parses
                              if not (len(unfinished_parse.buffer) == 0 and len(unfinished_parse.stack) == 1)]
