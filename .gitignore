@@ -6,3 +6,5 @@
 *.npy
 
 __pycache__/
+
+winter_2019/a2/utils/datasets/
