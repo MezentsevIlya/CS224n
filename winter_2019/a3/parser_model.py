@@ -46,7 +46,7 @@ class ParserModel(nn.Module):
         self.dropout_prob = dropout_prob
         self.embed_size = embeddings.shape[1]
         self.hidden_size = hidden_size
-        self.pretrained_embeddings = nn.Embedding(embeddings.shape[0], self.embed_size)
+        self.pretrained_embeddings = nn.Embedding(embeddings.shape[0], self.embed_size)  # |V| x d
         self.pretrained_embeddings.weight = nn.Parameter(torch.tensor(embeddings))
 
         ### YOUR CODE HERE (~5 Lines)
@@ -71,6 +71,13 @@ class ParserModel(nn.Module):
         ###     Linear Layer: https://pytorch.org/docs/stable/nn.html#torch.nn.Linear
         ###     Xavier Init: https://pytorch.org/docs/stable/nn.html#torch.nn.init.xavier_uniform_
         ###     Dropout: https://pytorch.org/docs/stable/nn.html#torch.nn.Dropout
+        self.embed_to_hidden = nn.Linear(self.embed_size * n_features, self.hidden_size, bias=True)
+        nn.init.xavier_uniform_(self.embed_to_hidden.weight, gain=1)
+
+        self.dropout = nn.Dropout(p=self.dropout_prob)
+
+        self.hidden_to_logits = nn.Linear(self.hidden_size, n_classes, bias=True)
+        nn.init.xavier_uniform_(self.hidden_to_logits.weight, gain=1)
 
 
         ### END YOUR CODE
@@ -103,8 +110,9 @@ class ParserModel(nn.Module):
         ###  Please see the following docs for support:
         ###     Embedding Layer: https://pytorch.org/docs/stable/nn.html#torch.nn.Embedding
         ###     View: https://pytorch.org/docs/stable/tensors.html#torch.Tensor.view
-
-
+        batch_size = t.shape[0]
+        x = self.pretrained_embeddings(t)
+        x = x.view(batch_size, self.n_features * self.embed_size)
         ### END YOUR CODE
         return x
 
@@ -141,7 +149,11 @@ class ParserModel(nn.Module):
         ###
         ### Please see the following docs for support:
         ###     ReLU: https://pytorch.org/docs/stable/nn.html?highlight=relu#torch.nn.functional.relu
-
+        x = self.embedding_lookup(t)  # embeddings
+        x = self.embed_to_hidden(x)
+        x = nn.functional.relu(x)
+        x = self.dropout(x)
+        logits = self.hidden_to_logits(x)
 
         ### END YOUR CODE
         return logits
