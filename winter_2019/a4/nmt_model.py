@@ -341,8 +341,6 @@ class NMT(nn.Module):
         #         https://pytorch.org/docs/stable/torch.html#torch.squeeze
         dec_state = self.decoder(Ybar_t, dec_state)
         dec_hidden, dec_cell = dec_state
-        # print(torch.unsqueeze(dec_hidden, 1).size())
-        # print(enc_hiddens_proj.transpose(1, 2).size())
 
         e_t = torch.bmm(torch.unsqueeze(dec_hidden, 1), enc_hiddens_proj.transpose(1, 2))
         e_t = torch.squeeze(e_t, 1)
