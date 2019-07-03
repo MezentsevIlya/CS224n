@@ -294,8 +294,8 @@ def decode(args: Dict[str, str]):
         for src_sent, hyps in zip(test_data_src, hypotheses):
             top_hyp = hyps[0]
             hyp_sent = ' '.join(top_hyp.value)
-            f.write('source sentence: ',  ' '.join(src_sent) + '\n')
-            f.write('translation: ', hyp_sent + '\n')
+            f.write('source sentence: ' +  ' '.join(src_sent) + '\n')
+            f.write('translation: ' + hyp_sent + '\n')
 
 
 def beam_search(model: NMT, test_data_src: List[List[str]], beam_size: int, max_decoding_time_step: int) -> List[List[Hypothesis]]:
