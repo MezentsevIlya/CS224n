@@ -289,7 +289,7 @@ def decode(args: Dict[str, str]):
         print('Corpus BLEU: {}'.format(bleu_score * 100), file=sys.stderr)
 
     output_file = args['OUTPUT_FILE']
-    os.makedirs(os.path.dirname(output_file))
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
     with open(output_file, 'w+') as f:
         for src_sent, hyps in zip(test_data_src, hypotheses):
             top_hyp = hyps[0]
