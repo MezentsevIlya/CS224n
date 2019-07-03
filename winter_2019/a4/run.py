@@ -45,6 +45,8 @@ import sys
 import pickle
 import time
 
+import os, os.path
+
 
 from docopt import docopt
 from nltk.translate.bleu_score import corpus_bleu, sentence_bleu, SmoothingFunction
@@ -286,7 +288,9 @@ def decode(args: Dict[str, str]):
         bleu_score = compute_corpus_level_bleu_score(test_data_tgt, top_hypotheses)
         print('Corpus BLEU: {}'.format(bleu_score * 100), file=sys.stderr)
 
-    with open(args['OUTPUT_FILE'], 'w+') as f:
+    output_file = args['OUTPUT_FILE']
+    os.makedirs(os.path.dirname(output_file))
+    with open(output_file, 'w+') as f:
         for src_sent, hyps in zip(test_data_src, hypotheses):
             top_hyp = hyps[0]
             hyp_sent = ' '.join(top_hyp.value)
