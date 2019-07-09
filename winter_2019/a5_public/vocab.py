@@ -126,9 +126,13 @@ class VocabEntry(object):
         ###     defined above.
         ###
         ###     You must prepend each word with the `start_of_word` character and append 
-        ###     with the `end_of_word` character. 
+        ###     with the `end_of_word` character.
+        word_ids = []
+        for sent in sents:
+            _sent = [[self.start_of_word] + [self.char2id[c] for c in word] + [self.end_of_word] for word in sent]
+            word_ids.append(_sent)
 
-
+        return word_ids
         ### END YOUR CODE
 
     def words2indices(self, sents):
