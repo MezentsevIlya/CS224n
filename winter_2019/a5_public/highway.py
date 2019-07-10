@@ -12,9 +12,13 @@ import torch.nn.functional as F
 
 class Highway(nn.Module):
     """
-
+    Highway model that maps from x_conv_out to x_highway
     """
     def __init__(self, embed_size):
+        """
+        Init layers
+        :param embed_size: size of word embedding, equals to e_word
+        """
         super(Highway, self).__init__()
 
         self.W_proj = nn.Linear(in_features=embed_size, out_features=embed_size, bias=True)
@@ -22,8 +26,9 @@ class Highway(nn.Module):
 
     def forward(self, x_conv_out: torch.Tensor):
         """
-        :param words_batch: shape (batch_size)
-        :return:
+        Mapping from x_conv_out to x_highway
+        :param x_conv_out:  size: (batch_size, e_word), e_word=embed_size
+        :return: x_highway, size: (batch_size, e_word), e_word=embed_size
         """
         x_proj = self.W_proj(x_conv_out)
         x_proj = F.relu(x_proj)

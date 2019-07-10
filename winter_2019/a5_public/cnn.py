@@ -10,7 +10,16 @@ import torch.nn.functional as F
 
 ### YOUR CODE HERE for part 1i
 class CNN(nn.Module):
+    """
+    CNN model that maps from x_reshaped to x_conv_out
+    """
     def __init__(self, e_char, filters_num, kernel_size):
+        """
+        Init layers
+        :param e_char: size of char embeddings
+        :param filters_num: number of filters in conv layer, equals to e_word - embedding word size
+        :param kernel_size: size of kernel in cnn
+        """
         super(CNN, self).__init__()
 
         self.conv = nn.Conv1d(in_channels=e_char, out_channels=filters_num, kernel_size=kernel_size,
@@ -21,6 +30,11 @@ class CNN(nn.Module):
 
 
     def forward(self, x_reshaped):
+        """
+        Mapping from x_reshaped to x_conv_out
+        :param x_reshaped: input, size: (batch_size, e_char, m_word), m_word is max len of word
+        :return: x_conv_out, size: (batch_size, e_word), e_word=filters_num
+        """
         print('x_reshaped: ', x_reshaped.size())
 
         x_conv = self.conv(x_reshaped)
