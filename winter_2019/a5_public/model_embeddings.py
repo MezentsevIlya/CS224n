@@ -10,7 +10,11 @@ Anand Dhoot <anandd@stanford.edu>
 Michael Hahn <mhahn2@stanford.edu>
 """
 
+import torch
 import torch.nn as nn
+
+from cnn import CNN
+from highway import Highway
 
 # Do not change these imports; your module names should be
 #   `CNN` in the file `cnn.py`
@@ -40,11 +44,17 @@ class ModelEmbeddings(nn.Module):
         ## End A4 code
 
         ### YOUR CODE HERE for part 1j
+        self.e_char = 50
+        self.embed_size = embed_size
+        self.pad_token_idx = vocab.char2id['<pad>']
 
-
+        self.embeddings = nn.Embedding(len(vocab.char2id), self.e_char, padding_idx=self.pad_token_idx)
+        self.cnn = CNN(e_char=self.e_char, filters_num=embed_size, kernel_size=5)
+        self.highway = Highway(embed_size=embed_size)
+        self.dropout = nn.Dropout(p=0.3)
         ### END YOUR CODE
 
-    def forward(self, input):
+    def forward(self, input: torch.Tensor):
         """
         Looks up character-based CNN embeddings for the words in a batch of sentences.
         @param input: Tensor of integers of shape (sentence_length, batch_size, max_word_length) where
@@ -59,7 +69,22 @@ class ModelEmbeddings(nn.Module):
         ## End A4 code
 
         ### YOUR CODE HERE for part 1j
+        x_padded = input # (sentence_length, batch_size, max_word_length)
+        sentence_length, batch_size, max_word_length = x_padded.size()
+        x_padded = x_padded.view(sentence_length * batch_size, max_word_length)
 
+        x_emb = self.embeddings(x_padded) # (sentence_length * batch_size, max_word_length, e_char)
+        # print('x_emb: ', x_emb.size())
+        x_reshaped = x_emb.permute(0, 2, 1) # (sentence_length * batch_size, e_char, max_word_length)
+        # print('x_reshaped: ', x_reshaped.size())
+        x_conv_out = self.cnn(x_reshaped) # (sentence_length * batch_size, f (=embed_size))
+        # print('x_conv_out: ', x_conv_out.size())
+        x_highway = self.highway(x_conv_out) # (sentence_length * batch_size, f (=embed_size))
+        # print('x_highway: ', x_highway.size())
+        x_word_emb = self.dropout(x_highway) # (sentence_length * batch_size, f (=embed_size))
+        # print('x_word_emb: ', x_word_emb.size())
+        output = x_word_emb.view(sentence_length, batch_size, x_word_emb.size()[-1])
 
+        return output
         ### END YOUR CODE
 
