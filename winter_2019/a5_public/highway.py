@@ -32,14 +32,14 @@ class Highway(nn.Module):
         """
         x_proj = self.W_proj(x_conv_out)
         x_proj = F.relu(x_proj)
-        print('x_proj: ', x_proj.size())
+        # print('x_proj: ', x_proj.size())
 
         x_gate = self.W_gate(x_conv_out)
         x_gate = torch.sigmoid(x_gate)
-        print('x_gate: ', x_gate.size())
+        # print('x_gate: ', x_gate.size())
 
         x_highway = x_gate * x_proj + (1 - x_gate) * x_proj # pointwise
-        print('x_highway: ', x_highway.size())
+        # print('x_highway: ', x_highway.size())
 
         return x_highway
 

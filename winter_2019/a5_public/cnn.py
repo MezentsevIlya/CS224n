@@ -24,9 +24,9 @@ class CNN(nn.Module):
 
         self.conv = nn.Conv1d(in_channels=e_char, out_channels=filters_num, kernel_size=kernel_size,
                               stride=1, padding=0)
-        print('e_char: ', e_char)
-        print('filters_num: ', filters_num)
-        print('kernel_size: ', 5)
+        # print('e_char: ', e_char)
+        # print('filters_num: ', filters_num)
+        # print('kernel_size: ', 5)
 
 
     def forward(self, x_reshaped):
@@ -35,16 +35,16 @@ class CNN(nn.Module):
         :param x_reshaped: input, size: (batch_size, e_char, m_word), m_word is max len of word
         :return: x_conv_out, size: (batch_size, e_word), e_word=filters_num
         """
-        print('x_reshaped: ', x_reshaped.size())
+        # print('x_reshaped: ', x_reshaped.size())
 
         x_conv = self.conv(x_reshaped)
 
-        print('x_conv: ', x_conv.size())
+        # print('x_conv: ', x_conv.size())
 
         x_conv_out = F.relu(x_conv)
         x_conv_out = F.max_pool1d(x_conv_out, kernel_size=x_conv.size()[-1])
         x_conv_out = torch.squeeze(x_conv_out, dim=2)
-        print('x_conv_out: ', x_conv_out.size())
+        # print('x_conv_out: ', x_conv_out.size())
 
         return x_conv_out
 ### END YOUR CODE
