@@ -112,12 +112,12 @@ class NMT(nn.Module):
         ###     - Add `target_padded_chars` for character level padded encodings for target
         ###     - Modify calls to encode() and decode() to use the character level encodings
         target_padded = self.vocab.tgt.to_input_tensor(target, device=self.device)   # Tensor: (tgt_len, b)
-        source_padded_chars = self.vocab.src.to_input_tensor_char(source, device=self.device)
-        target_padded_chars = self.vocab.tgt.to_input_tensor_char(target, device=self.device)
+        source_padded_chars = self.vocab.src.to_input_tensor_char(source, device=self.device) # Tensor: (tgt_len, b, m_word)
+        target_padded_chars = self.vocab.tgt.to_input_tensor_char(target, device=self.device) # Tensor: (tgt_len, b, m_word)
 
         enc_hiddens, dec_init_state = self.encode(source_padded_chars, source_lengths)
         enc_masks = self.generate_sent_masks(enc_hiddens, source_lengths)
-        combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded)
+        combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded_chars)
 
         ### END YOUR CODE
 
@@ -163,9 +163,7 @@ class NMT(nn.Module):
 
         ### COPY OVER YOUR CODE FROM ASSIGNMENT 4
         ### Except replace "self.model_embeddings.source" with "self.model_embeddings_source"
-        src_len, batch_size = source_padded.size()
         X = self.model_embeddings_source(source_padded)
-        X = X.view(src_len, batch_size, self.model_embeddings.embed_size)
         X = pack_padded_sequence(X, source_lengths)
 
         enc_hiddens, (last_hidden, last_cell) = self.encoder(X)
@@ -210,13 +208,12 @@ class NMT(nn.Module):
         ### Except replace "self.model_embeddings.target" with "self.model_embeddings_target"
         enc_hiddens_proj = self.att_projection(enc_hiddens)
 
-        tgt_len, batch_size = target_padded.size()
-        embed_size = self.model_embeddings.embed_size
+        tgt_len, batch_size, m_word = target_padded.size()
+        embed_size = self.model_embeddings_target.embed_size
+
         Y = self.model_embeddings_target(target_padded)
         Y = Y.view(tgt_len, batch_size, embed_size)
 
-        # o_prev = torch.zeros((batch_size, embed_size))
-        # dec_state = dec_init_state
         for Y_t in torch.split(Y, split_size_or_sections=1):
             Y_t = torch.squeeze(Y_t)
             Ybar_t = torch.cat((Y_t, o_prev), 1)

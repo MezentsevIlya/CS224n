@@ -70,19 +70,16 @@ class ModelEmbeddings(nn.Module):
 
         ### YOUR CODE HERE for part 1j
         x_padded = input # (sentence_length, batch_size, max_word_length)
-        sentence_length, batch_size, max_word_length = x_padded.size()
-        x_padded = x_padded.view(sentence_length * batch_size, max_word_length)
+        x_padded = x_padded.long()
 
-        x_emb = self.embeddings(x_padded) # (sentence_length * batch_size, max_word_length, e_char)
-        # print('x_emb: ', x_emb.size())
+        x_emb = self.embeddings(x_padded) # (sentence_length, batch_size, max_word_length, e_char)
+        sentence_length, batch_size, max_word_length, _  = x_emb.size()
+        x_emb = x_emb.view(sentence_length * batch_size, max_word_length, self.e_char)
+
         x_reshaped = x_emb.permute(0, 2, 1) # (sentence_length * batch_size, e_char, max_word_length)
-        # print('x_reshaped: ', x_reshaped.size())
         x_conv_out = self.cnn(x_reshaped) # (sentence_length * batch_size, f (=embed_size))
-        # print('x_conv_out: ', x_conv_out.size())
         x_highway = self.highway(x_conv_out) # (sentence_length * batch_size, f (=embed_size))
-        # print('x_highway: ', x_highway.size())
         x_word_emb = self.dropout(x_highway) # (sentence_length * batch_size, f (=embed_size))
-        # print('x_word_emb: ', x_word_emb.size())
         output = x_word_emb.view(sentence_length, batch_size, x_word_emb.size()[-1])
 
         return output
