@@ -7,6 +7,7 @@ CS224N 2018-19: Homework 5
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class CharDecoder(nn.Module):
     def __init__(self, hidden_size, char_embedding_size=50, target_vocab=None):
@@ -44,7 +45,6 @@ class CharDecoder(nn.Module):
         self.target_vocab = target_vocab
         ### END YOUR CODE
 
-
     
     def forward(self, input, dec_hidden=None):
         """ Forward pass of character decoder.
@@ -57,17 +57,12 @@ class CharDecoder(nn.Module):
         """
         ### YOUR CODE HERE for part 2b
         ### TODO - Implement the forward pass of the character decoder.
-        x = self.decoderCharEmb(input.permute(1, 0)) # (batch, length, e_char)
-        x = x.permute(1, 0, 2)
+        x = self.decoderCharEmb(input) # (length, batch, e_char)
         output, (h_n, c_n) = self.charDecoder(x, dec_hidden) # (length, batch, hidden_size), ((1, batch, hidden_size), (1, batch, hidden_size))
-        output = output.permute(1, 0, 2) # (batch, length, hidden_size)
-
-        s_t = self.char_output_projection(output) # (batch, length, V_char)
-        s_t = s_t.permute(1, 0, 2) # (length, batch, V_char)
+        s_t = self.char_output_projection(output) # (length, batch, V_char)
         ### END YOUR CODE
 
         return s_t, (h_n, c_n)
-
 
 
     def train_forward(self, char_sequence, dec_hidden=None):
@@ -83,8 +78,18 @@ class CharDecoder(nn.Module):
         ###
         ### Hint: - Make sure padding characters do not contribute to the cross-entropy loss.
         ###       - char_sequence corresponds to the sequence x_1 ... x_{n+1} from the handout (e.g., <START>,m,u,s,i,c,<END>).
+        input = char_sequence[:-1, :] # (length-1, batch)
+        s_t, (h_n, c_n) = self.forward(input, dec_hidden) # (length-1, batch, V_char)
 
+        target = char_sequence[1:, :]
+        target = target.contiguous().view(-1)
+
+        s_t = s_t.view(-1, s_t.size()[-1])
+
+        loss = nn.CrossEntropyLoss(reduction='sum', ignore_index=self.target_vocab.char2id['<pad>'])
+        return loss(s_t, target)
         ### END YOUR CODE
+
 
     def decode_greedy(self, initialStates, device, max_length=21):
         """ Greedy decoding
