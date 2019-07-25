@@ -27,8 +27,21 @@ class CharDecoder(nn.Module):
         ### Hint: - Use target_vocab.char2id to access the character vocabulary for the target language.
         ###       - Set the padding_idx argument of the embedding matrix.
         ###       - Create a new Embedding layer. Do not reuse embeddings created in Part 1 of this assignment.
-        
+        super(CharDecoder, self).__init__()
 
+        V_char = len(target_vocab.char2id)
+        self.charDecoder = nn.LSTM(input_size=char_embedding_size,
+                                   hidden_size=hidden_size,
+                                   num_layers=1,
+                                   bias=True,
+                                   bidirectional=False)
+        self.char_output_projection = nn.Linear(in_features=hidden_size,
+                                                out_features=V_char,
+                                                bias=True)
+        self.decoderCharEmb = nn.Embedding(num_embeddings=len(target_vocab.char2id),
+                                           embedding_dim=char_embedding_size,
+                                           padding_idx=target_vocab.char2id['<pad>'])
+        self.target_vocab = target_vocab
         ### END YOUR CODE
 
 
@@ -44,9 +57,17 @@ class CharDecoder(nn.Module):
         """
         ### YOUR CODE HERE for part 2b
         ### TODO - Implement the forward pass of the character decoder.
-        
-        
-        ### END YOUR CODE 
+        x = self.decoderCharEmb(input.permute(1, 0)) # (batch, length, e_char)
+        x = x.permute(1, 0, 2)
+        output, (h_n, c_n) = self.charDecoder(x, dec_hidden) # (length, batch, hidden_size), ((1, batch, hidden_size), (1, batch, hidden_size))
+        output = output.permute(1, 0, 2) # (batch, length, hidden_size)
+
+        s_t = self.char_output_projection(output) # (batch, length, V_char)
+        s_t = s_t.permute(1, 0, 2) # (length, batch, V_char)
+        ### END YOUR CODE
+
+        return s_t, (h_n, c_n)
+
 
 
     def train_forward(self, char_sequence, dec_hidden=None):
@@ -62,7 +83,6 @@ class CharDecoder(nn.Module):
         ###
         ### Hint: - Make sure padding characters do not contribute to the cross-entropy loss.
         ###       - char_sequence corresponds to the sequence x_1 ... x_{n+1} from the handout (e.g., <START>,m,u,s,i,c,<END>).
-
 
         ### END YOUR CODE
 
