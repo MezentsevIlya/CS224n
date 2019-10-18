@@ -16,6 +16,7 @@ import torch.nn as nn
 from cnn import CNN
 from highway import Highway
 
+
 # Do not change these imports; your module names should be
 #   `CNN` in the file `cnn.py`
 #   `Highway` in the file `highway.py`
@@ -26,10 +27,11 @@ from highway import Highway
 
 # End "do not change" 
 
-class ModelEmbeddings(nn.Module): 
+class ModelEmbeddings(nn.Module):
     """
     Class that converts input words to their CNN-based embeddings.
     """
+
     def __init__(self, embed_size, vocab):
         """
         Init the Embedding layer for one language
@@ -69,18 +71,17 @@ class ModelEmbeddings(nn.Module):
         ## End A4 code
 
         ### YOUR CODE HERE for part 1j
-        x_padded = input # (sentence_length, batch_size, max_word_length)
+        x_padded = input  # (sentence_length, batch_size, max_word_length)
 
-        x_emb = self.embeddings(x_padded) # (sentence_length, batch_size, max_word_length, e_char)
-        sentence_length, batch_size, max_word_length, _  = x_emb.size()
+        x_emb = self.embeddings(x_padded)  # (sentence_length, batch_size, max_word_length, e_char)
+        sentence_length, batch_size, max_word_length, _ = x_emb.size()
         x_emb = x_emb.view(sentence_length * batch_size, max_word_length, self.e_char)
 
-        x_reshaped = x_emb.permute(0, 2, 1) # (sentence_length * batch_size, e_char, max_word_length)
-        x_conv_out = self.cnn(x_reshaped) # (sentence_length * batch_size, f (=embed_size))
-        x_highway = self.highway(x_conv_out) # (sentence_length * batch_size, f (=embed_size))
-        x_word_emb = self.dropout(x_highway) # (sentence_length * batch_size, f (=embed_size))
+        x_reshaped = x_emb.permute(0, 2, 1)  # (sentence_length * batch_size, e_char, max_word_length)
+        x_conv_out = self.cnn(x_reshaped)  # (sentence_length * batch_size, f (=embed_size))
+        x_highway = self.highway(x_conv_out)  # (sentence_length * batch_size, f (=embed_size))
+        x_word_emb = self.dropout(x_highway)  # (sentence_length * batch_size, f (=embed_size))
         output = x_word_emb.view(sentence_length, batch_size, x_word_emb.size()[-1])
 
         return output
         ### END YOUR CODE
-

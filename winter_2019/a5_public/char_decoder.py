@@ -12,6 +12,7 @@ import torch.nn.functional as F
 import numpy as np
 import itertools
 
+
 class CharDecoder(nn.Module):
     def __init__(self, hidden_size, char_embedding_size=50, target_vocab=None):
         """ Init Character Decoder.
@@ -48,7 +49,6 @@ class CharDecoder(nn.Module):
         self.target_vocab = target_vocab
         ### END YOUR CODE
 
-    
     def forward(self, input, dec_hidden=None):
         """ Forward pass of character decoder.
 
@@ -60,13 +60,13 @@ class CharDecoder(nn.Module):
         """
         ### YOUR CODE HERE for part 2b
         ### TODO - Implement the forward pass of the character decoder.
-        x = self.decoderCharEmb(input.long()) # (length, batch, e_char)
-        output, (h_n, c_n) = self.charDecoder(x, dec_hidden) # (length, batch, hidden_size), ((1, batch, hidden_size), (1, batch, hidden_size))
-        s_t = self.char_output_projection(output) # (length, batch, V_char)
+        x = self.decoderCharEmb(input.long())  # (length, batch, e_char)
+        output, (h_n, c_n) = self.charDecoder(x,
+                                              dec_hidden)  # (length, batch, hidden_size), ((1, batch, hidden_size), (1, batch, hidden_size))
+        s_t = self.char_output_projection(output)  # (length, batch, V_char)
         ### END YOUR CODE
 
         return s_t, (h_n, c_n)
-
 
     def train_forward(self, char_sequence, dec_hidden=None):
         """ Forward computation during training.
@@ -81,8 +81,8 @@ class CharDecoder(nn.Module):
         ###
         ### Hint: - Make sure padding characters do not contribute to the cross-entropy loss.
         ###       - char_sequence corresponds to the sequence x_1 ... x_{n+1} from the handout (e.g., <START>,m,u,s,i,c,<END>).
-        input = char_sequence[:-1, :] # (length-1, batch)
-        s_t, (h_n, c_n) = self.forward(input, dec_hidden) # (length-1, batch, V_char)
+        input = char_sequence[:-1, :]  # (length-1, batch)
+        s_t, (h_n, c_n) = self.forward(input, dec_hidden)  # (length-1, batch, V_char)
 
         target = char_sequence[1:, :]
         target = target.contiguous().view(-1)
@@ -92,7 +92,6 @@ class CharDecoder(nn.Module):
         loss = nn.CrossEntropyLoss(reduction='sum', ignore_index=self.target_vocab.char2id['<pad>'])
         return loss(s_t, target.long())
         ### END YOUR CODE
-
 
     def decode_greedy(self, initialStates, device, max_length=21):
         """ Greedy decoding
@@ -122,7 +121,7 @@ class CharDecoder(nn.Module):
 
         h, c = h_i, c_i
         for i in range(max_length):
-            s, (h, c) = self.forward(current_char, (h, c)) # s.size() = (1, batch, V_char)
+            s, (h, c) = self.forward(current_char, (h, c))  # s.size() = (1, batch, V_char)
 
             p = F.softmax(s, dim=2)
 
@@ -138,4 +137,3 @@ class CharDecoder(nn.Module):
         # print(decoded_words)
         return decoded_words
         ### END YOUR CODE
-

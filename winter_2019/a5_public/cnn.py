@@ -8,11 +8,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 ### YOUR CODE HERE for part 1i
 class CNN(nn.Module):
     """
     CNN model that maps from x_reshaped to x_conv_out
     """
+
     def __init__(self, e_char, filters_num, kernel_size):
         """
         Init layers
@@ -27,7 +29,6 @@ class CNN(nn.Module):
         # print('e_char: ', e_char)
         # print('filters_num: ', filters_num)
         # print('kernel_size: ', 5)
-
 
     def forward(self, x_reshaped):
         """
@@ -47,6 +48,8 @@ class CNN(nn.Module):
         # print('x_conv_out: ', x_conv_out.size())
 
         return x_conv_out
+
+
 ### END YOUR CODE
 
 
@@ -60,7 +63,8 @@ def test_cnn():
     kernel_size = 5
 
     print('x_reshaped must be size of (batch_size, e_char, m_word) = ', (batch_size, e_char, m_word))
-    print('x_conv must be size of (batch_size, f, m_word - k + 1) = ', (batch_size, filter_num, m_word - kernel_size + 1))
+    print('x_conv must be size of (batch_size, f, m_word - k + 1) = ',
+          (batch_size, filter_num, m_word - kernel_size + 1))
     print('x_conv_out must be size of (batch_size, e_word (=f)) = ', (batch_size, filter_num))
 
     x_reshaped = torch.randn(batch_size, e_char, m_word)
@@ -71,4 +75,3 @@ def test_cnn():
 
 if __name__ == '__main__':
     test_cnn()
-

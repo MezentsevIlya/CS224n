@@ -10,10 +10,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Highway(nn.Module):
     """
     Highway model that maps from x_conv_out to x_highway
     """
+
     def __init__(self, embed_size):
         """
         Init layers
@@ -32,18 +34,18 @@ class Highway(nn.Module):
         """
         x_proj = self.W_proj(x_conv_out)
         x_proj = F.relu(x_proj)
-        # print('x_proj: ', x_proj.size())
 
         x_gate = self.W_gate(x_conv_out)
         x_gate = torch.sigmoid(x_gate)
-        # print('x_gate: ', x_gate.size())
 
-        x_highway = x_gate * x_proj + (1 - x_gate) * x_proj # pointwise
-        # print('x_highway: ', x_highway.size())
+        x_highway = x_gate * x_proj + (1 - x_gate) * x_proj  # pointwise
 
         return x_highway
 
-### END YOUR CODE 
+
+### END YOUR CODE
+
+
 def test_highway():
     batch_size = 10
     print('batch_size: ', batch_size)
@@ -62,4 +64,3 @@ def test_highway():
 
 if __name__ == '__main__':
     test_highway()
-
