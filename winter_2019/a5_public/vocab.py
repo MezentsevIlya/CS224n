@@ -164,7 +164,7 @@ class VocabEntry(object):
         ###     previous parts
         _sents = self.words2charindices(sents)
         _sents = pad_sents_char(_sents, self['<pad>'])
-        _sents = torch.Tensor(_sents)
+        _sents = torch.Tensor(_sents, device=device)
         _sents = _sents.permute(1, 0, 2)
 
         ### END YOUR CODE
