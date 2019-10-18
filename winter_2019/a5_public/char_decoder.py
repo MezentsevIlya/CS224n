@@ -9,6 +9,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import numpy as np
+import itertools
+
 class CharDecoder(nn.Module):
     def __init__(self, hidden_size, char_embedding_size=50, target_vocab=None):
         """ Init Character Decoder.
@@ -57,7 +60,7 @@ class CharDecoder(nn.Module):
         """
         ### YOUR CODE HERE for part 2b
         ### TODO - Implement the forward pass of the character decoder.
-        x = self.decoderCharEmb(input) # (length, batch, e_char)
+        x = self.decoderCharEmb(input.long()) # (length, batch, e_char)
         output, (h_n, c_n) = self.charDecoder(x, dec_hidden) # (length, batch, hidden_size), ((1, batch, hidden_size), (1, batch, hidden_size))
         s_t = self.char_output_projection(output) # (length, batch, V_char)
         ### END YOUR CODE
@@ -87,7 +90,7 @@ class CharDecoder(nn.Module):
         s_t = s_t.view(-1, s_t.size()[-1])
 
         loss = nn.CrossEntropyLoss(reduction='sum', ignore_index=self.target_vocab.char2id['<pad>'])
-        return loss(s_t, target)
+        return loss(s_t, target.long())
         ### END YOUR CODE
 
 
@@ -108,7 +111,31 @@ class CharDecoder(nn.Module):
         ###      - Use torch.tensor(..., device=device) to turn a list of character indices into a tensor.
         ###      - We use curly brackets as start-of-word and end-of-word characters. That is, use the character '{' for <START> and '}' for <END>.
         ###        Their indices are self.target_vocab.start_of_word and self.target_vocab.end_of_word, respectively.
-        
-        
+        h_i, c_i = initialStates
+        batch_size = h_i.size()[1]
+
+        output_words = np.zeros((batch_size, max_length))
+        output_words[:, 0] = self.target_vocab.start_of_word
+
+        current_char = torch.zeros(1, batch_size, device=device).long()
+        current_char[0, :] = self.target_vocab.start_of_word
+
+        h, c = h_i, c_i
+        for i in range(max_length):
+            s, (h, c) = self.forward(current_char, (h, c)) # s.size() = (1, batch, V_char)
+
+            p = F.softmax(s, dim=2)
+
+            current_char = torch.argmax(p, dim=2)
+            output_words[:, i] = current_char.numpy()
+
+        end_of_word_index = self.target_vocab.end_of_word
+        decoded_words = []
+        for output_word in output_words:
+            decoded_word = itertools.takewhile(lambda c: c != end_of_word_index, output_word[:])
+            decoded_words.append(''.join([self.target_vocab.id2char[c] for c in decoded_word]))
+
+        # print(decoded_words)
+        return decoded_words
         ### END YOUR CODE
 
