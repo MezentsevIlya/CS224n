@@ -186,13 +186,13 @@ def train(args: Dict):
             cum_examples += batch_size
 
             if train_iter % log_every == 0:
-                print('epoch %d, iter %d, avg. loss %.2f, avg. ppl %.2f ' \
-                      'cum. examples %d, speed %.2f words/sec, time elapsed %.2f sec' % (epoch, train_iter,
-                                                                                         report_loss / report_examples,
-                                                                                         math.exp(report_loss / report_tgt_words),
-                                                                                         cum_examples,
-                                                                                         report_tgt_words / (time.time() - train_time),
-                                                                                         time.time() - begin_time), file=sys.stderr)
+                # print('epoch %d, iter %d, avg. loss %.2f, avg. ppl %.2f ' \
+                #       'cum. examples %d, speed %.2f words/sec, time elapsed %.2f sec' % (epoch, train_iter,
+                #                                                                          report_loss / report_examples,
+                #                                                                          math.exp(report_loss / report_tgt_words),
+                #                                                                          cum_examples,
+                #                                                                          report_tgt_words / (time.time() - train_time),
+                #                                                                          time.time() - begin_time), file=sys.stderr)
 
                 train_time = time.time()
                 report_loss = report_tgt_words = report_examples = 0.
