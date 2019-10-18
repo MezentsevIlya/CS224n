@@ -48,7 +48,7 @@ def pad_sents_char(sents, char_pad_token):
         _sent = []
         for word in sent:
             _word = word[:max_word_length]
-            _word = word + [char_pad_token] * (max_word_length - len(word))
+            _word = _word + [char_pad_token] * (max_word_length - len(word))
             _sent.append(_word)
 
         _sent += [pad_word] * (max_sent_len - len(_sent))
