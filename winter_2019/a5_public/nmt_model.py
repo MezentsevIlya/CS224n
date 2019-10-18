@@ -115,6 +115,14 @@ class NMT(nn.Module):
         source_padded_chars = self.vocab.src.to_input_tensor_char(source, device=self.device) # Tensor: (tgt_len, b, m_word)
         target_padded_chars = self.vocab.tgt.to_input_tensor_char(target, device=self.device) # Tensor: (tgt_len, b, m_word)
 
+        print('self.device', self.device)
+        print('source_padded_chars')
+        cuda_check = source_padded_chars.is_cuda
+        print('source_padded_chars cuda_check: ', cuda_check)
+        if cuda_check:
+            get_cuda_device = source_padded_chars.get_device()
+            print('source_padded_chars get_cuda_device: ', get_cuda_device)
+
         enc_hiddens, dec_init_state = self.encode(source_padded_chars, source_lengths)
         enc_masks = self.generate_sent_masks(enc_hiddens, source_lengths)
         combined_outputs = self.decode(enc_hiddens, enc_masks, dec_init_state, target_padded_chars)
