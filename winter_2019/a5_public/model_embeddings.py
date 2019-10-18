@@ -70,7 +70,6 @@ class ModelEmbeddings(nn.Module):
 
         ### YOUR CODE HERE for part 1j
         x_padded = input # (sentence_length, batch_size, max_word_length)
-        x_padded = x_padded.long()
 
         x_emb = self.embeddings(x_padded) # (sentence_length, batch_size, max_word_length, e_char)
         sentence_length, batch_size, max_word_length, _  = x_emb.size()
