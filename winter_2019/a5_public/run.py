@@ -43,6 +43,7 @@ Options:
 """
 import sys
 import time
+import math
 from typing import List, Dict
 
 import numpy as np
@@ -51,6 +52,7 @@ import torch.nn.utils
 from docopt import docopt
 from nltk.translate.bleu_score import corpus_bleu
 from tqdm import tqdm
+from torch.utils.tensorboard import SummaryWriter
 
 from nmt_model import Hypothesis, NMT
 from vocab import Vocab
@@ -141,6 +143,7 @@ def train(args: Dict):
     print('use device: %s' % device, file=sys.stderr)
 
     model = model.to(device)
+    writer = SummaryWriter(log_dir='/tmp/log')
 
     optimizer = torch.optim.Adam(model.parameters(), lr=float(args['--lr']))
 
@@ -192,6 +195,10 @@ def train(args: Dict):
                 #                                                                          time.time() - begin_time), file=sys.stderr)
 
                 train_time = time.time()
+                writer.add_scalar('avg cum. loss/train', cum_loss / cum_examples, train_iter)
+
+                writer.add_scalar('ppl/train', -evaluate_ppl(model, train_data, batch_size=1024), train_iter)
+                writer.add_scalar('ppl/val', -evaluate_ppl(model, dev_data, batch_size=1024), train_iter)
                 report_loss = report_tgt_words = report_examples = 0.
 
             # perform validation
@@ -203,6 +210,7 @@ def train(args: Dict):
                                                                                              cum_examples),
                       file=sys.stderr)
 
+                dev_ppl = evaluate_ppl(model, dev_data, batch_size=128)
                 cum_loss = cum_examples = cum_tgt_words = 0.
                 valid_num += 1
 
@@ -216,6 +224,7 @@ def train(args: Dict):
 
                 is_better = len(hist_valid_scores) == 0 or valid_metric > max(hist_valid_scores)
                 hist_valid_scores.append(valid_metric)
+
 
                 if is_better:
                     patience = 0
