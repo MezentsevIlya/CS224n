@@ -197,8 +197,6 @@ def train(args: Dict):
                 train_time = time.time()
                 writer.add_scalar('avg cum. loss/train', cum_loss / cum_examples, train_iter)
 
-                writer.add_scalar('ppl/train', -evaluate_ppl(model, train_data, batch_size=256), train_iter)
-                writer.add_scalar('ppl/val', -evaluate_ppl(model, dev_data, batch_size=256), train_iter)
                 report_loss = report_tgt_words = report_examples = 0.
 
             # perform validation
@@ -216,8 +214,11 @@ def train(args: Dict):
                 print('begin validation ...', file=sys.stderr)
 
                 # compute dev. ppl and bleu
-                dev_ppl = evaluate_ppl(model, dev_data, batch_size=128)  # dev batch size can be a bit larger
+                dev_ppl = evaluate_ppl(model, dev_data, batch_size=256)  # dev batch size can be a bit larger
                 valid_metric = -dev_ppl
+
+                writer.add_scalar('ppl/train', -evaluate_ppl(model, train_data, batch_size=256), train_iter)
+                writer.add_scalar('ppl/val', valid_metric, train_iter)
 
                 print('validation: iter %d, dev. ppl %f' % (train_iter, dev_ppl), file=sys.stderr)
 
